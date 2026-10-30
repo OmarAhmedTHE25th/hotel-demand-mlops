@@ -1,0 +1,11 @@
+data_path: data/H2.csv
+cleaned_data_path: data/H2_clean.csv
+adr_max: 500
+classification_use_adr: false
+log_transform_leadtime: true
+random_seed: 42
+test_size: 0.15
+val_size: 0.15
+outputs_dir: outputs
+artifacts_dir: artifacts
+splits_dir: data/splits

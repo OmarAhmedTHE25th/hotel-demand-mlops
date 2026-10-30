@@ -1,0 +1,48 @@
+Missing values (NaN and 'NULL'):
+  Agent: 8131 (10.25%)
+  Company: 75641 (95.35%)
+  Country: 24 (0.03%)
+  Children: 4 (0.01%)
+
+Duplicate rows: 25902
+
+IsCanceled class balance (normalized):
+IsCanceled
+0    0.58273
+1    0.41727
+Name: proportion, dtype: float64
+
+Categorical column cardinalities:
+  ArrivalDateMonth: 12
+  Meal: 4
+  Country: 166
+  MarketSegment: 8
+  DistributionChannel: 5
+  ReservedRoomType: 8
+  AssignedRoomType: 9
+  DepositType: 3
+  Agent: 224
+  Company: 208
+  CustomerType: 4
+  ReservationStatus: 3
+
+Unusual values:
+  Adults == 0: 390
+  ADR <= 0: 1208
+  ADR max: 5400.0
+  Zero total nights: 331
+  Adults + Children + Babies == 0: 167
+  Children NaN: 4
+
+Numeric column description:
+         IsCanceled  ...  TotalOfSpecialRequests
+count  79330.000000  ...            79330.000000
+mean       0.417270  ...                0.546918
+std        0.493111  ...                0.780776
+min        0.000000  ...                0.000000
+25%        0.000000  ...                0.000000
+50%        0.000000  ...                0.000000
+75%        1.000000  ...                1.000000
+max        1.000000  ...                5.000000
+
+[8 rows x 18 columns]
