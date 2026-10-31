@@ -1,0 +1,53 @@
+{
+  "evaluation_split": "validation",
+  "test_evaluated": false,
+  "train_rows": 36623,
+  "validation_rows": 7848,
+  "features": [
+    "LeadTime",
+    "ArrivalDateYear",
+    "ArrivalDateMonth",
+    "ArrivalDateWeekNumber",
+    "ArrivalDateDayOfMonth",
+    "StaysInWeekendNights",
+    "StaysInWeekNights",
+    "Adults",
+    "Children",
+    "Babies",
+    "Meal",
+    "Country",
+    "MarketSegment",
+    "DistributionChannel",
+    "IsRepeatedGuest",
+    "PreviousCancellations",
+    "PreviousBookingsNotCanceled",
+    "ReservedRoomType",
+    "DepositType",
+    "Agent",
+    "Company",
+    "CustomerType"
+  ],
+  "config": {
+    "data_path": "data/H2.csv",
+    "cleaned_data_path": "data/H2_clean.csv",
+    "adr_max": 500,
+    "classification_use_adr": false,
+    "log_transform_leadtime": true,
+    "random_seed": 42,
+    "test_size": 0.15,
+    "val_size": 0.15,
+    "outputs_dir": "outputs",
+    "artifacts_dir": "artifacts",
+    "splits_dir": "data/splits",
+    "regression_exclude_features": [
+      "RequiredCarParkingSpaces",
+      "TotalOfSpecialRequests"
+    ]
+  },
+  "data_sha256": "6796f5b9b2b9e7281662b29730fc2880f8e614107d0d14d09be2ede1a6e605a4",
+  "split_sha256": "bbe1d6f64dc256cce5f5e4ad1179be506ca0666d2ee8166e2792e918646312f4",
+  "python": "3.12.14",
+  "sklearn": "1.9.1",
+  "pandas": "3.0.1",
+  "numpy": "2.5.4"
+}

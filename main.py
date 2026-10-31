@@ -13,6 +13,7 @@ from src.data.loader import load_config, load_h2
 from src.features.feature_sets import get_features, print_feature_report
 from src.preprocessing.pipeline import build_preprocessor
 from src.preprocessing.splits import split_classification, split_regression
+from src.regression.train import train_regression
 
 
 def analyze_data() -> None:
@@ -115,7 +116,7 @@ def build_parser() -> argparse.ArgumentParser:
     features_parser = subparsers.add_parser(
         "features", help="Print task feature sets and leakage documentation"
     )
-    features_parser.set_defaults(handler=print_feature_report)
+    features_parser.set_defaults(handler=lambda: print_feature_report(load_config()))
 
     split_parser = subparsers.add_parser(
         "split", help="Create reproducible train/validation/test splits"
@@ -138,6 +139,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Task-specific preprocessor to fit",
     )
     preprocess_parser.set_defaults(handler=preprocess_dataset)
+    train_parser = subparsers.add_parser(
+        "train", help="Train untuned models and report validation metrics"
+    )
+    train_parser.add_argument("--task", choices=("regression",), required=True)
+    train_parser.set_defaults(handler=train_regression)
     return parser
 
 
