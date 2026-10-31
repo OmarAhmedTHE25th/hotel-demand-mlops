@@ -1,0 +1,4 @@
+,accuracy,precision,recall,f1,roc_auc,pr_auc
+logistic_regression_tuned,0.7822,0.6738,0.5406,0.5999,0.8415,0.6787
+random_forest_tuned,0.8189,0.7449,0.6088,0.67,0.892,0.7854
+xgboost_tuned,0.8185,0.7195,0.6542,0.6853,0.8914,0.7826

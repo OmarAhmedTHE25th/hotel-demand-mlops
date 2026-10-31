@@ -7,6 +7,8 @@ from typing import Optional, Sequence
 import joblib
 import pandas as pd
 
+from src.classification.train import train_baseline_classification
+from src.tuning.classification import tune_classification
 from src.data.cleaning import clean_data
 from src.data.eda import run_eda
 from src.data.loader import load_config, load_h2
@@ -138,6 +140,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Task-specific preprocessor to fit",
     )
     preprocess_parser.set_defaults(handler=preprocess_dataset)
+    
+    train_parser = subparsers.add_parser(
+        "train", help="Train classification or regression models"
+    )
+    train_parser.add_argument(
+        "--task",
+        choices=("classification", "regression"),
+        required=True,
+        help="Task to train",
+    )
+    train_parser.set_defaults(handler=train_baseline_classification)
+    
+    tune_parser = subparsers.add_parser(
+        "tune", help="Tune classification or regression models"
+    )
+    tune_parser.add_argument(
+        "--task",
+        choices=("classification", "regression"),
+        required=True,
+        help="Task to tune",
+    )
+    tune_parser.set_defaults(handler=tune_classification)
+    
     return parser
 
 
@@ -145,7 +170,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     """Parse command-line arguments and run the selected command."""
     parser = build_parser()
     args = parser.parse_args(argv)
-    if args.command in {"split", "preprocess"}:
+    if args.command in {"split", "preprocess", "train", "tune"}:
         args.handler(args.task)
     else:
         args.handler()

@@ -32,19 +32,19 @@ The loader verified the expected **79,330 rows and 31 columns**. `analyze` repor
 
 Raw-data statistics, calculated directly from `data/H2.csv`:
 
-| Statistic | `LeadTime` | `ADR` |
-|---|---:|---:|
-| Count | 79,330 | 79,330 |
-| Mean | 109.7357 | 105.3045 |
-| Standard deviation | 110.9485 | 43.6030 |
-| Minimum | 0 | 0 |
-| 25th percentile | 23 | 79.2 |
-| Median | 74 | 99.9 |
-| 75th percentile | 163 | 126 |
-| 95th percentile | 334.55 | 175.5 |
-| 99th percentile | 461 | 228 |
-| 99.9th percentile | 615 | 289.59048 |
-| Maximum | 629 | 5,400 |
+| Statistic          | `LeadTime` |     `ADR` |
+|--------------------|-----------:|----------:|
+| Count              |     79,330 |    79,330 |
+| Mean               |   109.7357 |  105.3045 |
+| Standard deviation |   110.9485 |   43.6030 |
+| Minimum            |          0 |         0 |
+| 25th percentile    |         23 |      79.2 |
+| Median             |         74 |      99.9 |
+| 75th percentile    |        163 |       126 |
+| 95th percentile    |     334.55 |     175.5 |
+| 99th percentile    |        461 |       228 |
+| 99.9th percentile  |        615 | 289.59048 |
+| Maximum            |        629 |     5,400 |
 
 The raw `IsCanceled` proportions are 0.58273 for class `0` and 0.41727 for class `1`.
 
@@ -52,23 +52,23 @@ The raw `IsCanceled` proportions are 0.58273 for class `0` and 0.41727 for class
 
 The EDA reports missing values by treating both NaN and case-insensitive, whitespace-trimmed `"NULL"` strings as missing. In the raw `analyze` output, `Agent` and `Company` each have zero NaN values because their missing entries are stored as strings.
 
-| Column | Missing entries (NaN or `"NULL"`) | Percentage |
-|---|---:|---:|
-| `Agent` | 8,131 | 10.25% |
-| `Company` | 75,641 | 95.35% |
-| `Country` | 24 | 0.03% |
-| `Children` | 4 | 0.01% |
+| Column     | Missing entries (NaN or `"NULL"`) | Percentage |
+|------------|----------------------------------:|-----------:|
+| `Agent`    |                             8,131 |     10.25% |
+| `Company`  |                            75,641 |     95.35% |
+| `Country`  |                                24 |      0.03% |
+| `Children` |                                 4 |      0.01% |
 
 There are **25,902 exact duplicate rows** in the raw data. The EDA’s raw-data `IsCanceled` proportions are reported above. The raw EDA also found:
 
-| Check | Count/value |
-|---|---:|
-| `Adults == 0` | 390 |
-| `ADR <= 0` | 1,208 |
-| Maximum `ADR` | 5,400 |
-| Zero total nights | 331 |
-| `Adults + Children + Babies == 0` | 167 |
-| `Children` NaN | 4 |
+| Check                             | Count/value |
+|-----------------------------------|------------:|
+| `Adults == 0`                     |         390 |
+| `ADR <= 0`                        |       1,208 |
+| Maximum `ADR`                     |       5,400 |
+| Zero total nights                 |         331 |
+| `Adults + Children + Babies == 0` |         167 |
+| `Children` NaN                    |           4 |
 
 The EDA categorical cardinalities are: `ArrivalDateMonth` 12; `Meal` 4; `Country` 166; `MarketSegment` 8; `DistributionChannel` 5; `ReservedRoomType` 8; `AssignedRoomType` 9; `DepositType` 3; `Agent` 224; `Company` 208; `CustomerType` 4; and `ReservationStatus` 3. Since `"NULL"` is a string in the raw file, it is included among the distinct values counted for `Agent` and `Company`.
 
@@ -76,17 +76,17 @@ The EDA categorical cardinalities are: `ArrivalDateMonth` 12; `Meal` 4; `Country
 
 `python main.py eda` converts `ReservationStatusDate` to datetime for the EDA run, prints the preceding quality summary and numeric description, and writes nine figures to `outputs/`.
 
-| Figure | Visual interpretation |
-|---|---|
-| [`adr_histogram.png`](../outputs/adr_histogram.png) | The visible mass is concentrated at the low end of the ADR axis, with a long, sparse right tail. |
-| [`adr_boxplot.png`](../outputs/adr_boxplot.png) | Many high-side outliers are visible, including an isolated point around 5,400. |
-| [`lead_time_histogram.png`](../outputs/lead_time_histogram.png) | Counts are greatest near zero and generally decline toward the upper end of the plotted range, forming a right-skewed distribution. |
-| [`lead_time_boxplot.png`](../outputs/lead_time_boxplot.png) | The boxplot shows a wide upper tail and many high-side outlier points. |
-| [`cancellation_by_arrival_month.png`](../outputs/cancellation_by_arrival_month.png) | Monthly cancellation rates appear broadly similar; April is visually among the higher bars and March among the lower bars. |
-| [`cancellation_by_deposit_type.png`](../outputs/cancellation_by_deposit_type.png) | `Non Refund` has the highest visible cancellation rate, `Refundable` is lower, and `No Deposit` is lowest. |
-| [`cancellation_by_market_segment.png`](../outputs/cancellation_by_market_segment.png) | The displayed rates vary by segment; `Undefined` is highest, while `Complementary` and `Aviation` are among the lowest visible bars. |
-| [`numeric_correlation_heatmap.png`](../outputs/numeric_correlation_heatmap.png) | Most off-diagonal cells appear near the neutral color; the `ArrivalDateYear`–`ArrivalDateWeekNumber` cell is visibly negative, while some booking-history feature pairs are positive. |
-| [`top_15_countries.png`](../outputs/top_15_countries.png) | `PRT` has a much longer bar than the other displayed countries; `FRA` and `DEU` follow at a substantial distance. |
+| Figure                                                                                | Visual interpretation                                                                                                                                                                 |
+|---------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`adr_histogram.png`](../outputs/adr_histogram.png)                                   | The visible mass is concentrated at the low end of the ADR axis, with a long, sparse right tail.                                                                                      |
+| [`adr_boxplot.png`](../outputs/adr_boxplot.png)                                       | Many high-side outliers are visible, including an isolated point around 5,400.                                                                                                        |
+| [`lead_time_histogram.png`](../outputs/lead_time_histogram.png)                       | Counts are greatest near zero and generally decline toward the upper end of the plotted range, forming a right-skewed distribution.                                                   |
+| [`lead_time_boxplot.png`](../outputs/lead_time_boxplot.png)                           | The boxplot shows a wide upper tail and many high-side outlier points.                                                                                                                |
+| [`cancellation_by_arrival_month.png`](../outputs/cancellation_by_arrival_month.png)   | Monthly cancellation rates appear broadly similar; April is visually among the higher bars and March among the lower bars.                                                            |
+| [`cancellation_by_deposit_type.png`](../outputs/cancellation_by_deposit_type.png)     | `Non Refund` has the highest visible cancellation rate, `Refundable` is lower, and `No Deposit` is lowest.                                                                            |
+| [`cancellation_by_market_segment.png`](../outputs/cancellation_by_market_segment.png) | The displayed rates vary by segment; `Undefined` is highest, while `Complementary` and `Aviation` are among the lowest visible bars.                                                  |
+| [`numeric_correlation_heatmap.png`](../outputs/numeric_correlation_heatmap.png)       | Most off-diagonal cells appear near the neutral color; the `ArrivalDateYear`–`ArrivalDateWeekNumber` cell is visibly negative, while some booking-history feature pairs are positive. |
+| [`top_15_countries.png`](../outputs/top_15_countries.png)                             | `PRT` has a much longer bar than the other displayed countries; `FRA` and `DEU` follow at a substantial distance.                                                                     |
 
 The figures are descriptive outputs only. The cancellation-rate plots do not display group sample sizes, so their bar heights should not be read as evidence of equal precision across groups.
 
@@ -128,39 +128,39 @@ The feature definitions assume classification and regression predictions are mad
 
 The `EXCLUDED` and `BORDERLINE` documentation in [`src/features/feature_sets.py`](../src/features/feature_sets.py) specifies:
 
-| Column | Tasks | Type | Reason recorded in code |
-|---|---|---|---|
-| `ReservationStatus` | All | Direct | Encodes the final reservation outcome. |
-| `ReservationStatusDate` | All | Direct | Date associated with the final reservation outcome. |
-| `BookingChanges` | Classification, regression | Indirect | May change after booking and is unavailable at the assumed prediction point. |
-| `AssignedRoomType` | Classification, regression | Indirect | May be assigned or changed after booking. |
-| `DaysInWaitingList` | Classification, regression | Indirect | Can reflect post-booking waiting-list events. |
-| `IsCanceled` | Regression, clustering | Direct | Classification target; excluded as an input for other tasks. It is the classification target. |
-| `ADR` | Regression | Direct | Regression target, returned separately from regression inputs. |
-| `ADR` | Classification | Borderline | May be informative at booking time; excluded by default but configurable. |
-| `RequiredCarParkingSpaces` | Classification, regression | Borderline | May be updated after booking; retained in both feature lists. |
-| `TotalOfSpecialRequests` | All | Borderline | May be updated after booking; retained in all feature lists. |
+| Column                     | Tasks                      | Type       | Reason recorded in code                                                                       |
+|----------------------------|----------------------------|------------|-----------------------------------------------------------------------------------------------|
+| `ReservationStatus`        | All                        | Direct     | Encodes the final reservation outcome.                                                        |
+| `ReservationStatusDate`    | All                        | Direct     | Date associated with the final reservation outcome.                                           |
+| `BookingChanges`           | Classification, regression | Indirect   | May change after booking and is unavailable at the assumed prediction point.                  |
+| `AssignedRoomType`         | Classification, regression | Indirect   | May be assigned or changed after booking.                                                     |
+| `DaysInWaitingList`        | Classification, regression | Indirect   | Can reflect post-booking waiting-list events.                                                 |
+| `IsCanceled`               | Regression, clustering     | Direct     | Classification target; excluded as an input for other tasks. It is the classification target. |
+| `ADR`                      | Regression                 | Direct     | Regression target, returned separately from regression inputs.                                |
+| `ADR`                      | Classification             | Borderline | May be informative at booking time; excluded by default but configurable.                     |
+| `RequiredCarParkingSpaces` | Classification, regression | Borderline | May be updated after booking; retained in both feature lists.                                 |
+| `TotalOfSpecialRequests`   | All                        | Borderline | May be updated after booking; retained in all feature lists.                                  |
 
 ## 7. Preliminary leakage audit
 
-| Stage | What the code does / what it is fitted on | Leakage note |
-|---|---|---|
-| Cleaning | Deterministic conversions and row filters run on the full raw dataset before splitting; no learned parameters are fitted. | Exact duplicates are detected across the entire dataset before split assignment. |
-| Feature selection | Uses static task lists and the `classification_use_adr` config flag. | No data-dependent feature selection is implemented. |
-| Split | `train_test_split` assigns row positions; classification uses `IsCanceled` for stratification. Regression first applies the configured ADR target filter, then splits without stratification. | The ADR filter is a target-based rule applied before regression splitting, not a learned model step. |
-| Classification/regression preprocessing | Fits the preprocessor on `X_train` only, then transforms validation and test inputs. | No metrics or model evaluation are run by `preprocess`. |
-| Clustering preprocessing | The CLI assigns all cleaned rows to `X_train`, `X_val`, and `X_test` (copies of the same feature frame), then fits on the full frame. | This is not a genuine split; clustering preprocessing is fitted on all cleaned records. |
-| Test set | Supervised preprocessing transforms test inputs after fitting on train. Split-function docstrings say not to use test data for tuning or model selection. | No tuning or model-selection implementation is present to enforce this rule programmatically. |
-| Dimensionality reduction and tuning | No implementation was found in the corresponding source packages; those package directories contain only initializers. | Future work must fit any learned transformation/tuning exclusively within training data or training folds. |
+| Stage                                   | What the code does / what it is fitted on                                                                                                                                                     | Leakage note                                                                                               |
+|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| Cleaning                                | Deterministic conversions and row filters run on the full raw dataset before splitting; no learned parameters are fitted.                                                                     | Exact duplicates are detected across the entire dataset before split assignment.                           |
+| Feature selection                       | Uses static task lists and the `classification_use_adr` config flag.                                                                                                                          | No data-dependent feature selection is implemented.                                                        |
+| Split                                   | `train_test_split` assigns row positions; classification uses `IsCanceled` for stratification. Regression first applies the configured ADR target filter, then splits without stratification. | The ADR filter is a target-based rule applied before regression splitting, not a learned model step.       |
+| Classification/regression preprocessing | Fits the preprocessor on `X_train` only, then transforms validation and test inputs.                                                                                                          | No metrics or model evaluation are run by `preprocess`.                                                    |
+| Clustering preprocessing                | The CLI assigns all cleaned rows to `X_train`, `X_val`, and `X_test` (copies of the same feature frame), then fits on the full frame.                                                         | This is not a genuine split; clustering preprocessing is fitted on all cleaned records.                    |
+| Test set                                | Supervised preprocessing transforms test inputs after fitting on train. Split-function docstrings say not to use test data for tuning or model selection.                                     | No tuning or model-selection implementation is present to enforce this rule programmatically.              |
+| Dimensionality reduction and tuning     | No implementation was found in the corresponding source packages; those package directories contain only initializers.                                                                        | Future work must fit any learned transformation/tuning exclusively within training data or training folds. |
 
 ## 8. Train/validation/test strategy
 
 The configuration sets `random_seed: 42`, `val_size: 0.15`, and `test_size: 0.15`, giving an intended 70/15/15 allocation. The split functions save zero-based row positions to `data/splits/classification_indices.json` and `data/splits/regression_indices.json`.
 
-| Task | Filter / stratification | Train rows | Validation rows | Test rows | Target summary |
-|---|---|---:|---:|---:|---|
-| Classification | No ADR filter; stratified on `IsCanceled` | 37,130 | 7,956 | 7,957 | Train: `0` 0.697953, `1` 0.302047; validation: `0` 0.697964, `1` 0.302036; test: `0` 0.697876, `1` 0.302124 |
-| Regression | `0 < ADR <= 500`; not stratified; 724 rows filtered before splitting | 36,623 | 7,848 | 7,848 | Train ADR mean/std: 113.0530 / 39.4341; validation: 113.2592 / 39.8299; test: 113.7608 / 39.4394 |
+| Task           | Filter / stratification                                              | Train rows | Validation rows | Test rows | Target summary                                                                                              |
+|----------------|----------------------------------------------------------------------|-----------:|----------------:|----------:|-------------------------------------------------------------------------------------------------------------|
+| Classification | No ADR filter; stratified on `IsCanceled`                            |     37,130 |           7,956 |     7,957 | Train: `0` 0.697953, `1` 0.302047; validation: `0` 0.697964, `1` 0.302036; test: `0` 0.697876, `1` 0.302124 |
+| Regression     | `0 < ADR <= 500`; not stratified; 724 rows filtered before splitting |     36,623 |           7,848 |     7,848 | Train ADR mean/std: 113.0530 / 39.4341; validation: 113.2592 / 39.8299; test: 113.7608 / 39.4394            |
 
 These are row counts from the executed split commands. Clustering does not use this splitting strategy in the current `preprocess` command; see the leakage audit and discrepancy list.
 
@@ -177,11 +177,11 @@ These are row counts from the executed split commands. Clustering does not use t
 
 Executed output feature counts and artifacts:
 
-| Task | Transformed train/validation/test shapes | Feature count | NaN check | Saved preprocessor |
-|---|---|---:|---|---|
-| Classification | 37,130 × 88 / 7,956 × 88 / 7,957 × 88 | 88 | No NaN | `artifacts/preprocessor_classification.joblib` |
-| Regression | 36,623 × 87 / 7,848 × 87 / 7,848 × 87 | 87 | No NaN | `artifacts/preprocessor_regression.joblib` |
-| Clustering | 53,043 × 31 / 53,043 × 31 / 53,043 × 31 | 31 | No NaN | `artifacts/preprocessor_clustering.joblib` |
+| Task           | Transformed train/validation/test shapes | Feature count | NaN check | Saved preprocessor                             |
+|----------------|------------------------------------------|--------------:|-----------|------------------------------------------------|
+| Classification | 37,130 × 88 / 7,956 × 88 / 7,957 × 88    |            88 | No NaN    | `artifacts/preprocessor_classification.joblib` |
+| Regression     | 36,623 × 87 / 7,848 × 87 / 7,848 × 87    |            87 | No NaN    | `artifacts/preprocessor_regression.joblib`     |
+| Clustering     | 53,043 × 31 / 53,043 × 31 / 53,043 × 31  |            31 | No NaN    | `artifacts/preprocessor_clustering.joblib`     |
 
 For clustering, the three shapes describe repeated transforms of the same full cleaned dataset, not separate partitions.
 
@@ -189,14 +189,14 @@ For clustering, the three shapes describe repeated transforms of the same full c
 
 The executed `pytest` run collected **14 tests** and passed all of them:
 
-| Test file | Tests | Coverage read from test definitions |
-|---|---:|---|
-| `tests/test_cleaning.py` | 5 | Duplicate removal, zero-guest removal, zero-night removal, `"NULL"` conversion while retaining missing `Children`, and regression ADR filtering. |
-| `tests/test_eda.py` | 1 | Checks that EDA creates its summary and expected PNG files; skips when `data/H2.csv` is absent. |
-| `tests/test_loader.py` | 1 | Checks the loader’s expected shape; skips when `data/H2.csv` is absent. |
-| `tests/test_pipeline.py` | 3 | Checks unseen validation categories and NaN-free equal-width outputs, train-only numeric median imputation, and engineered totals/flags. |
-| `tests/test_splits.py` | 4 | Checks split disjointness/sizes, class proportions, task leakage exclusions, regression ADR filtering, repeatability with a fixed seed, and configurable classification ADR inclusion. |
-| **Total** | **14** | Full suite passed; one seaborn pending-deprecation warning. |
+| Test file                |  Tests | Coverage read from test definitions                                                                                                                                                    |
+|--------------------------|-------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `tests/test_cleaning.py` |      5 | Duplicate removal, zero-guest removal, zero-night removal, `"NULL"` conversion while retaining missing `Children`, and regression ADR filtering.                                       |
+| `tests/test_eda.py`      |      1 | Checks that EDA creates its summary and expected PNG files; skips when `data/H2.csv` is absent.                                                                                        |
+| `tests/test_loader.py`   |      1 | Checks the loader’s expected shape; skips when `data/H2.csv` is absent.                                                                                                                |
+| `tests/test_pipeline.py` |      3 | Checks unseen validation categories and NaN-free equal-width outputs, train-only numeric median imputation, and engineered totals/flags.                                               |
+| `tests/test_splits.py`   |      4 | Checks split disjointness/sizes, class proportions, task leakage exclusions, regression ADR filtering, repeatability with a fixed seed, and configurable classification ADR inclusion. |
+| **Total**                | **14** | Full suite passed; one seaborn pending-deprecation warning.                                                                                                                            |
 
 ## 11. Known limitations and plan for Milestone 2
 
