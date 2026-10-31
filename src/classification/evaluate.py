@@ -1,9 +1,10 @@
 """Evaluation utilities for binary classification (IsCanceled)."""
 
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 import matplotlib
+from sklearn.metrics import precision_recall_curve, roc_curve
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +12,6 @@ import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
     average_precision_score,
-    classification_report,
     confusion_matrix,
     f1_score,
     precision_score,
@@ -88,6 +88,53 @@ def plot_confusion_matrix(
     plt.close(fig)
     return cm
 
+
+def plot_roc_pr_curves(
+    y_true: Union[pd.Series, np.ndarray],
+    y_prob: Union[pd.Series, np.ndarray],
+    model_name: str,
+    output_dir: Union[str, Path] = "outputs",
+) -> None:
+    """Generate and save ROC and PR curves for a given model."""
+    out_path = Path(output_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+
+    # ROC Curve
+    fpr, tpr, _ = roc_curve(y_true, y_prob)
+    auc_val = roc_auc_score(y_true, y_prob)
+
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.plot(fpr, tpr, label=f"ROC (AUC = {auc_val:.4f})", color="darkorange", lw=2)
+    ax.plot([0, 1], [0, 1], color="navy", lw=1.5, linestyle="--")
+    ax.set(
+        xlim=[0.0, 1.0],
+        ylim=[0.0, 1.05],
+        xlabel="False Positive Rate",
+        ylabel="True Positive Rate",
+        title=f"ROC Curve: {model_name}",
+    )
+    ax.legend(loc="lower right")
+    fig.tight_layout()
+    fig.savefig(out_path / f"roc_{model_name}.png")
+    plt.close(fig)
+
+    # PR Curve
+    precision, recall, _ = precision_recall_curve(y_true, y_prob)
+    pr_auc_val = average_precision_score(y_true, y_prob)
+
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.plot(recall, precision, label=f"PR (AP = {pr_auc_val:.4f})", color="green", lw=2)
+    ax.set(
+        xlim=[0.0, 1.0],
+        ylim=[0.0, 1.05],
+        xlabel="Recall",
+        ylabel="Precision",
+        title=f"Precision-Recall Curve: {model_name}",
+    )
+    ax.legend(loc="lower left")
+    fig.tight_layout()
+    fig.savefig(out_path / f"pr_{model_name}.png")
+    plt.close(fig)
 
 def format_metrics_table(results: dict[str, dict[str, float]]) -> pd.DataFrame:
     """Convert multiple model metric dictionaries into a comparison DataFrame."""

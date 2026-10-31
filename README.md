@@ -44,14 +44,55 @@ The dataset is not tracked by Git.
 
 ## Run commands
 
-Analyze the dataset:
+The project uses a unified CLI in `main.py`.
 
+### Data and EDA
+
+Analyze the raw dataset summary:
 ```bash
 python main.py analyze
 ```
 
-Run the tests:
+Run exploratory data analysis (saves plots to `outputs/`):
+```bash
+python main.py eda
+```
 
+Apply deterministic cleaning rules (saves `data/H2_clean.csv`):
+```bash
+python main.py clean
+```
+
+### Classification Workflow
+
+Create reproducible train/validation/test splits:
+```bash
+python main.py split --task classification
+```
+
+Fit and save the preprocessing pipeline:
+```bash
+python main.py preprocess --task classification
+```
+
+Train baseline models (Logistic Regression, Random Forest, XGBoost):
+```bash
+python main.py train --task classification
+```
+
+Tune models using Optuna:
+```bash
+python main.py tune --task classification
+```
+
+Evaluate final models on the test set:
+```bash
+python main.py evaluate --task classification
+```
+
+### Testing
+
+Run all project tests:
 ```bash
 pytest
 ```

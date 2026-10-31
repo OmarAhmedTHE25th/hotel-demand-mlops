@@ -15,7 +15,7 @@ from src.data.loader import load_config, load_h2
 from src.features.feature_sets import get_features, print_feature_report
 from src.preprocessing.pipeline import build_preprocessor
 from src.preprocessing.splits import split_classification, split_regression
-
+from src.classification.select_and_test import evaluate_final_classification
 
 def analyze_data() -> None:
     """Load the hotel booking data and print a basic dataset summary."""
@@ -162,6 +162,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Task to tune",
     )
     tune_parser.set_defaults(handler=tune_classification)
+
+    eval_parser = subparsers.add_parser(
+        "evaluate", help="Evaluate final models and report test metrics"
+    )
+    eval_parser.add_argument(
+        "--task",
+        choices=("classification", "regression"),
+        required=True,
+        help="Task to evaluate",
+    )
+    eval_parser.set_defaults(handler=evaluate_final_classification)
     
     return parser
 
@@ -172,9 +183,10 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     args = parser.parse_args(argv)
     if args.command in {"split", "preprocess", "train", "tune"}:
         args.handler(args.task)
+    elif args.command == "evaluate":
+        args.handler()
     else:
         args.handler()
-
 
 if __name__ == "__main__":
     main()
