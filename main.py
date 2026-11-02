@@ -117,7 +117,7 @@ def build_parser() -> argparse.ArgumentParser:
     features_parser = subparsers.add_parser(
         "features", help="Print task feature sets and leakage documentation"
     )
-    features_parser.set_defaults(handler=print_feature_report)
+    features_parser.set_defaults(handler=lambda: print_feature_report(load_config()))
 
     split_parser = subparsers.add_parser(
         "split", help="Create reproducible train/validation/test splits"

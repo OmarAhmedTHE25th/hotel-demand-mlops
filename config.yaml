@@ -9,3 +9,6 @@ val_size: 0.15
 outputs_dir: outputs
 artifacts_dir: artifacts
 splits_dir: data/splits
+regression_exclude_features:
+  - RequiredCarParkingSpaces
+  - TotalOfSpecialRequests

@@ -159,17 +159,23 @@ def get_features(task: str, config: dict[str, Any]) -> list[str]:
         )
 
     features = list(TASK_FEATURES[task])
+    if task == "regression":
+        excluded = set(config.get("regression_exclude_features", []))
+        unknown = excluded.difference(features)
+        if unknown:
+            raise ValueError(f"Unknown regression exclusions: {sorted(unknown)}")
+        features = [column for column in features if column not in excluded]
     if task == "classification" and config.get("classification_use_adr", False):
         if "ADR" not in features:
             features.append("ADR")
     return features
 
 
-def print_feature_report() -> None:
+def print_feature_report(config: dict[str, Any] | None = None) -> None:
     """Print kept features and documented exclusions for each task."""
     for task in TASK_FEATURES:
         print(f"{task.title()} kept features:")
-        print(", ".join(get_features(task, {"classification_use_adr": False})))
+        print(", ".join(get_features(task, config or {})))
         target = TASK_TARGETS[task] or "None (unsupervised)"
         print(f"Target: {target}")
 
@@ -181,6 +187,9 @@ def print_feature_report() -> None:
         }
         for column, details in excluded.items():
             print(f"  {column} [{details['type']}]: {details['reason']}")
+        if task == "regression":
+            for column in (config or {}).get("regression_exclude_features", []):
+                print(f"  {column} [timing risk]: excluded by regression configuration.")
 
         print("Borderline columns:")
         for column, details in BORDERLINE.items():
