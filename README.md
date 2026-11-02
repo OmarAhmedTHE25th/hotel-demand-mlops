@@ -2,12 +2,12 @@
 
 ## Team members and GitHub accounts
 
-- Team member: `<Name>` — GitHub: `<username>`
+- Team member: Omar Ahmed Abdel Hameed — GitHub: OmarAhmedTHE25th
 - Team member: `<Name>` — GitHub: `<username>`
 
 ## Repository
 
-- GitHub repository URL: `<repository URL>`
+- GitHub repository URL: https://github.com/OmarAhmedTHE25th/hotel-demand-mlops
 - Commit SHA: `<commit SHA>`
 
 ## Environment setup

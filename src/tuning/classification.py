@@ -56,8 +56,7 @@ def objective(trial, model_name, X, y, random_seed):
 
 def tune_classification(
     task: str = "classification",
-    config: Optional[Dict[str, Any]] = None,
-    n_trials: int = 20
+    config: Optional[Dict[str, Any]] = None
 ) -> pd.DataFrame:
     """Tune all baseline classifiers and return a comparison report."""
     if task != "classification":
