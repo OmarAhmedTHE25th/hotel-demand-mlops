@@ -2,7 +2,7 @@
 
 ## Team members and GitHub accounts
 
-- Omar - GitHub: `OmarAhmedTHE25th` - Task A (Regression)
+- Omar Mohamed Salaheldin - ID: `24P0466` - GitHub: `subzeroomar` - Task A (Regression)
 - Team member: `<Name>` — GitHub: `<username>`
 - Team member: `<Name>` — GitHub: `<username>`
 
@@ -57,7 +57,28 @@ Run the tests:
 pytest
 ```
 
-## Milestone 1 - Task A: ADR regression (Omar)
+## Milestone 1 - Task A: ADR regression
+
+- **Student:** Omar Mohamed Salaheldin
+- **Student ID:** 24P0466
+- **GitHub:** subzeroomar
+- **Progress report updated:** 3 November 2026
+- **Milestone 1 deadline:** 5 November 2026
+
+### Milestone 1 progress
+
+Completed for Task A: definition of the prediction point and feature assumptions,
+preliminary leakage audit, integration with the team's reusable preprocessing and
+saved splits, one untuned regression model (Linear Regression), a training-mean
+reference baseline, validation metrics, and saved fitted pipelines. The results
+below are from the integrated run on 31 October 2026; this documentation update
+does not represent a new training run.
+
+The final supervised test set has not been evaluated by this regression workflow.
+Additional regression families, hyperparameter tuning, PCA comparisons, final model
+selection, final test evaluation, and application integration remain planned work
+for Milestone 2. Booking-time feature provenance and the limitations below still
+require review with the team/TA.
 
 ### Prediction point and feature choices
 
@@ -147,7 +168,7 @@ detect row-count/partition problems but cannot prove the identity or ordering of
 a different same-sized dataset. Use the specified original H2 file, shared
 cleaning, and recorded hashes consistently.
 
-### Initial results
+### Milestone 1 validation results
 
 Measured on 31 October 2026 using 36,623 training rows and 7,848 validation
 rows from the committed shared split. Cleaning leaves 53,043 rows; the shared
@@ -175,7 +196,7 @@ An earlier independent prototype reported MAE 15.24, RMSE 22.19, and R-squared
 0.720. Those are prototype-only validation scores and are not evidence of this
 integrated pipeline's performance.
 
-### Limitations, contributions, and next steps
+### Current limitations
 
 The ADR filter excludes zero/negative rates and rates above 500; performance is
 conditional on that restricted population and should not be generalized to all
@@ -187,13 +208,17 @@ all nonlinearities or interactions, and redundant engineered features mean
 individual coefficient interpretations need care. Country and intermediary
 features can encode population differences and require generalization checks.
 
-**Omar's contribution:** regression training/evaluation module, CLI integration,
+### Individual contribution
+
+**Omar Mohamed Salaheldin (24P0466):** regression training/evaluation module, CLI integration,
 read-only reuse and validation of the shared split manifest, conservative
 regression feature configuration, holdout-isolation tests, and this report section.
 The data loader, cleaning, preprocessing builder, original feature definitions,
 and original split assignments are the preprocessing teammate's contribution.
 
-Next: review booking-time availability with the team/TA; compare additional
+### Next steps after Milestone 1
+
+Review booking-time availability with the team/TA; compare additional
 untuned models such as Random Forest and SVR; tune at least three selected
 regression families using training-only CV with the complete preprocessing
 pipeline inside each fold; coordinate PCA comparisons; select by a declared
