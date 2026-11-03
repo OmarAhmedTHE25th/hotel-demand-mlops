@@ -2,46 +2,67 @@
 
 ## Team members and GitHub accounts
 
-- Omar Mohamed Salaheldin - ID: `24P0466` - GitHub: `subzeroomar` - Task A (Regression)
-- Team member: `<Name>` — GitHub: `<username>`
+- Omar Ahmed Abdel Hameed — GitHub: `OmarAhmedTHE25th` — Repository owner
+- Omar Mohamed Salaheldin — GitHub: `subzeroomar` — Task A (Regression)
 - Team member: `<Name>` — GitHub: `<username>`
 
 ## Repository
 
-- GitHub repository URL: `<repository URL>`
-- Commit SHA: `<commit SHA>`
+- GitHub repository URL: [hotel-demand-mlops](https://github.com/OmarAhmedTHE25th/hotel-demand-mlops)
+- Submission commit SHA: `<fill with the final Milestone 1 submission commit>`
+
+After committing the version submitted for Milestone 1, obtain its SHA with:
+
+```powershell
+git rev-parse HEAD
+```
+
+## Current stage
+
+Milestone 1: data preparation and initial untuned experiments, due **5 November 2026**.
+Use validation/CV results for initial comparisons. Keep the final supervised test
+set reserved for Milestone 2 final evaluation. Tuning, additional model comparisons,
+PCA/LDA, and final application integration are remaining project work.
 
 ## Environment setup
 
-Create and activate a virtual environment, then install the project dependencies:
+In VS Code, open the repository folder containing `main.py`, `requirements.txt`,
+and `src`, then open **Terminal → New Terminal**. Run these commands separately
+from the repository root in Windows PowerShell:
 
-```bash
+```powershell
+python --version
 python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Activate it:
+In VS Code, use **Python: Select Interpreter** to select
+`.venv\Scripts\python.exe`. The commands below use that interpreter directly,
+so activating the environment is optional. To activate it in PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+On macOS/Linux, create the same environment, activate it, and install dependencies:
 
 ```bash
-# Windows PowerShell
-.venv\Scripts\Activate.ps1
-
-# macOS/Linux
+python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
+When an environment is activated, `python` can replace
+`.\.venv\Scripts\python.exe` in the Windows commands below.
 
 ## Data download
 
-Place the City Hotel booking dataset at `data/H2.csv`. It can be downloaded from:
+Place the original City Hotel booking dataset at `data/H2.csv`:
 
-<https://raw.githubusercontent.com/afaq-ahmad/Hotel-booking-demand-Case-Study/master/H2.csv>
+[Download H2.csv](https://raw.githubusercontent.com/afaq-ahmad/Hotel-booking-demand-Case-Study/master/H2.csv)
 
-The dataset is not tracked by Git.
+The dataset is not tracked by Git. Use H2 only; do not merge it with H1.
+Run commands from the repository root so the configured relative paths resolve.
 
 ## Run commands
 
@@ -50,52 +71,90 @@ The project uses a unified CLI in `main.py`.
 ### Data and EDA
 
 Analyze the raw dataset summary:
-```bash
-python main.py analyze
+
+```powershell
+.\.venv\Scripts\python.exe main.py analyze
 ```
 
 Run exploratory data analysis (saves plots to `outputs/`):
-```bash
-python main.py eda
+
+```powershell
+.\.venv\Scripts\python.exe main.py eda
 ```
 
 Apply deterministic cleaning rules (saves `data/H2_clean.csv`):
-```bash
-python main.py clean
+
+```powershell
+.\.venv\Scripts\python.exe main.py clean
 ```
 
-### Classification Workflow
+### Regression workflow — Milestone 1
 
-Create reproducible train/validation/test splits:
-```bash
-python main.py split --task classification
+Train the untuned Linear Regression model and training-mean reference baseline,
+using shared preprocessing and the committed regression split assignments:
+
+```powershell
+.\.venv\Scripts\python.exe main.py train --task regression
 ```
 
-Fit and save the preprocessing pipeline:
-```bash
-python main.py preprocess --task classification
+This command reads the original `data/H2.csv`, reuses the team's deterministic
+cleaning, and fits preprocessing on training rows only. It evaluates validation
+rows and saves metrics to `outputs/regression/validation_metrics.csv`. Do not run
+`split` or `preprocess` first for this regression experiment; its training command
+uses the committed split manifest and creates complete fitted model pipelines.
+The final test set is not scored by this command.
+
+### Classification workflow — Milestone 1
+
+The classification trainer expects `data/H2_clean.csv`, created by the shared
+`clean` command above. Shared split and standalone preprocessing commands are
+available for the team's initial setup; preserve agreed split assignments when
+comparing experiments:
+
+```powershell
+.\.venv\Scripts\python.exe main.py split --task classification
+.\.venv\Scripts\python.exe main.py preprocess --task classification
 ```
 
-Train baseline models (Logistic Regression, Random Forest, XGBoost):
-```bash
-python main.py train --task classification
+Train untuned Logistic Regression, Random Forest, and XGBoost classifiers and
+report their validation results:
+
+```powershell
+.\.venv\Scripts\python.exe main.py train --task classification
 ```
 
-Tune models using Optuna:
-```bash
-python main.py tune --task classification
+### Later-stage classification commands — Milestone 2
+
+The incoming classification implementation includes the following commands.
+They are not part of the Milestone 1 baseline reproduction steps.
+
+Tune classifiers using Optuna:
+
+```powershell
+.\.venv\Scripts\python.exe main.py tune --task classification
 ```
 
-Evaluate final models on the test set:
-```bash
-python main.py evaluate --task classification
+Only after model selection is frozen for final evaluation, evaluate the selected
+classifier on the final test set:
+
+```powershell
+.\.venv\Scripts\python.exe main.py evaluate --task classification
 ```
+
+Regression tuning and final-test evaluation commands are not implemented yet.
 
 ### Testing
 
 Run all project tests:
-```bash
-pytest
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+Run only the regression checks:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q tests/test_regression.py
 ```
 
 ## Milestone 1 - Task A: ADR regression
