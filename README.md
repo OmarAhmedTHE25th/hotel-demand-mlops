@@ -2,7 +2,7 @@
 
 ## Team members and GitHub accounts
 
-- Omar Ahmed Abdel Hameed — GitHub: `OmarAhmedTHE25th` — Repository owner
+- Omar Ahmed Abdel Hameed — GitHub: `OmarAhmedTHE25th` — Task B (Classification)
 - Omar Mohamed Salaheldin — GitHub: `subzeroomar` — Task A (Regression)
 - Team member: `<Name>` — GitHub: `<username>`
 
