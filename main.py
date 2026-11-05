@@ -8,6 +8,7 @@ import joblib
 import pandas as pd
 
 from src.classification.train import train_baseline_classification
+from src.clustering.train import train_baseline_clustering
 from src.tuning.classification import tune_classification
 from src.data.cleaning import clean_data
 from src.data.eda import run_eda
@@ -173,7 +174,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="Task to evaluate",
     )
     eval_parser.set_defaults(handler=evaluate_final_classification)
-    
+
+    cluster_parser = subparsers.add_parser(
+        "cluster", help="Run untuned clustering on the cleaned booking population"
+    )
+    cluster_parser.add_argument(
+        "--algorithm",
+        choices=("kmeans",),
+        default="kmeans",
+        help="Clustering algorithm to run",
+    )
+    cluster_parser.add_argument(
+        "--clusters",
+        type=int,
+        default=5,
+        help="Number of clusters for the untuned baseline",
+    )
+    cluster_parser.set_defaults(handler=train_baseline_clustering)
+
     return parser
 
 
@@ -183,6 +201,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     args = parser.parse_args(argv)
     if args.command in {"split", "preprocess", "train", "tune"}:
         args.handler(args.task)
+    elif args.command == "cluster":
+        args.handler(algorithm=args.algorithm, n_clusters=args.clusters)
     elif args.command == "evaluate":
         args.handler()
     else:

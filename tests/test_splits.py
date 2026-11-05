@@ -21,6 +21,7 @@ def make_synthetic_data(row_count: int = 400) -> pd.DataFrame:
         + REGRESSION_FEATURES
         + CLUSTERING_FEATURES
         + [
+            "ADR",
             "IsCanceled",
             "ReservationStatus",
             "ReservationStatusDate",
