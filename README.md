@@ -10,7 +10,7 @@
 ## Repository
 
 - GitHub repository URL: [hotel-demand-mlops](https://github.com/OmarAhmedTHE25th/hotel-demand-mlops)
-- Submission commit SHA: `<fill with the final Milestone 1 submission commit>`
+- Submission commit SHA: `aeec08845ebc12d54f93b65974d7130f4778e234`
 
 After committing the version submitted for Milestone 1, obtain its SHA with:
 
