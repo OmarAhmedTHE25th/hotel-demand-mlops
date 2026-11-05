@@ -27,7 +27,7 @@ This project develops a machine learning operations pipeline to analyze and pred
 
 ## 3. Repository & Submission
 - **GitHub repository URL:** https://github.com/OmarAhmedTHE25th/hotel-demand-mlops
-- **Submission commit SHA:** `aeec08845ebc12d54f93b65974d7130f4778e234`
+- **Submission commit SHA:** `426dd830ee8c28893937c901bb1bc04b8492f61e`
 - **Verification command:** `git rev-parse HEAD`
 
 ## 4. Environment Setup & Data
