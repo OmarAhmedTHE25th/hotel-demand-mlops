@@ -4,9 +4,9 @@
 
 This section documents the data-side work in the CSE382 City Hotel (H2) project: dataset loading and verification, exploratory data analysis (EDA), rule-based cleaning, task-specific feature selection, splitting, and preprocessing. Model training and baseline comparisons are outside this section and are not implemented in the inspected source tree.
 
-- **GitHub repository:** <https://github.com/OmarAhmedTHE25th/hotel-demand-mlops>
-- **Commit SHA:** `<commit SHA>` (the workspace has no Git metadata, so a local commit could not be verified)
-- **Author:** `<name and GitHub handle>`
+- **GitHub repository URL:** https://github.com/OmarAhmedTHE25th/hotel-demand-mlops
+- **Submission commit SHA:** `0cc9b57328ce8c59234f5edb27721ea89d706fe1`
+- **Verification command:** `git rev-parse HEAD`
 - **Dataset:** City Hotel H2; `load_h2()` asserts a shape of `(79330, 31)` and reports the dataset download URL on missing-file errors.
 
 The report was reproduced with these commands, using the workspace Python 3.13 environment:
