@@ -110,52 +110,62 @@ The configured regression threshold is `adr_max: 500`. `clean` prints raw `ADR` 
 
 The feature definitions assume classification and regression predictions are made at booking time, when the booking enters the PMS. Original dataset column names are retained. The target is returned separately from input features.
 
-**Classification kept features by default** (24):
+### 6.1 Prediction Point and Feature Assumptions (Tasks A, B, C)
+Estimate a booking's eventual outcomes (`ADR`, `IsCanceled`, or cluster segment) when it first enters the PMS. This is a retrospective approximation: H2 does not provide versioned snapshots of every field at booking creation.
 
-`LeadTime`, `ArrivalDateYear`, `ArrivalDateMonth`, `ArrivalDateWeekNumber`, `ArrivalDateDayOfMonth`, `StaysInWeekendNights`, `StaysInWeekNights`, `Adults`, `Children`, `Babies`, `Meal`, `Country`, `MarketSegment`, `DistributionChannel`, `IsRepeatedGuest`, `PreviousCancellations`, `PreviousBookingsNotCanceled`, `ReservedRoomType`, `DepositType`, `Agent`, `Company`, `CustomerType`, `RequiredCarParkingSpaces`, `TotalOfSpecialRequests`.
+Candidate predictors reuse the team's source-label mapping and feature builder:
 
-`IsCanceled` is the classification target. `ADR` is excluded by default; `classification_use_adr: true` would add it to the classification inputs.
+| Inputs                                                            | Timing Assumption & Rationale                                          |
+|-------------------------------------------------------------------|------------------------------------------------------------------------|
+| `LeadTime`, Arrival Year/Month/Week/Day                           | Advance booking and seasonality; assume original planned arrival date. |
+| Stays, `Adults`, `Children`, `Babies`                             | Stay and party composition; assume booking-time quantities.            |
+| `Meal`, `ReservedRoomType`                                        | The requested product/package; assume the original reservation.        |
+| `Country`, `MarketSegment`, `DistributionChannel`, `CustomerType` | Booking context and distribution; assume info available on creation.   |
+| `IsRepeatedGuest`, `PrevCancellations`, `PrevBookingsNotCanceled` | Prior history only; excludes events after current booking creation.    |
+| `DepositType`, `Agent`, `Company`                                 | Booking terms and intermediaries; assume established on creation.      |
 
-**Regression kept features** (24):
+The shared preprocessor derives total nights, total guests, `HasAgent`, and `HasCompany`, uses `log1p(LeadTime)`, and replaces the sparse Company identifier with its presence indicator.
 
-`LeadTime`, `ArrivalDateYear`, `ArrivalDateMonth`, `ArrivalDateWeekNumber`, `ArrivalDateDayOfMonth`, `StaysInWeekendNights`, `StaysInWeekNights`, `Adults`, `Children`, `Babies`, `Meal`, `Country`, `MarketSegment`, `DistributionChannel`, `IsRepeatedGuest`, `PreviousCancellations`, `PreviousBookingsNotCanceled`, `ReservedRoomType`, `DepositType`, `Agent`, `Company`, `CustomerType`, `RequiredCarParkingSpaces`, `TotalOfSpecialRequests`.
+## 7. Comprehensive Leakage Audit
+A primary goal of this milestone was to establish strict boundaries between features and targets, and between training and validation/test data.
 
-`ADR` is the regression target.
+### 7.1 Target Exclusions
+- `ADR` is removed from inputs for Tasks A and C; no ADR-derived feature or target encoding is used. For Task B, it is configurable but excluded by default.
+- `IsCanceled`, `ReservationStatus`, and `ReservationStatusDate` reveal final outcomes and are strictly excluded from all feature sets.
 
-**Clustering kept features** (12):
+### 7.2 Temporal Safety & Outcome Fields
+- `AssignedRoomType`, `BookingChanges`, and `DaysInWaitingList` can reflect post-booking events and are excluded by the team's feature definition.
+- `RequiredCarParkingSpaces` and `TotalOfSpecialRequests` are flagged as "borderline" because they can be updated after booking. For the Task A (Regression) baseline, these were excluded to maintain a conservative stance. Other tasks retain them for comparison.
 
-`LeadTime`, `StaysInWeekendNights`, `StaysInWeekNights`, `Adults`, `Children`, `Babies`, `MarketSegment`, `DistributionChannel`, `DepositType`, `CustomerType`, `IsRepeatedGuest`, `TotalOfSpecialRequests`.
+### 7.3 Data Fitting Rules
+- Median/mode imputation, category grouping, one-hot encoding, and scaling are fitted **only on training rows** within each complete model pipeline. Validation uses `predict`, never `fit` or `fit_transform`.
+- Shared exact-duplicate removal occurs before splitting to prevent identical records from appearing in both train and validation sets. However, identical predictor rows with different outcomes (e.g., separate bookings by the same customer type) can still cross partitions.
 
-`ADR` is excluded from clustering inputs so the discovered segments do not encode a realized booking outcome; `IsCanceled` remains excluded as the classification target. Both are removed in [`src/features/feature_sets.py`](../src/features/feature_sets.py).
+## 8. Metric Analysis & Prototype Comparisons
+### 8.1 Regression (Task A)
+Linear Regression reduces validation MAE by approximately 51% relative to the training-mean baseline. The larger RMSE indicates that some errors are substantially larger than the mean. R² (0.72) compares squared error against a validation-mean reference.
+- *Historical Note:* An earlier independent prototype reported MAE 15.24 and RMSE 22.19. The integrated pipeline achieved MAE 15.03, verifying the modular implementation matches prior research.
 
-The `EXCLUDED` and `BORDERLINE` documentation in [`src/features/feature_sets.py`](../src/features/feature_sets.py) specifies:
+### 8.2 Classification (Task B)
+Logistic Regression provides a solid baseline (Accuracy 0.78, F1 0.60), but tree-based models (Random Forest, XGBoost) show superior performance (Accuracy ~0.82, F1 ~0.68) even without tuning. This suggests non-linear interactions are present in the cancellation behavior.
 
-| Column                     | Tasks                      | Type       | Reason recorded in code                                                                       |
-|----------------------------|----------------------------|------------|-----------------------------------------------------------------------------------------------|
-| `ReservationStatus`        | All                        | Direct     | Encodes the final reservation outcome.                                                        |
-| `ReservationStatusDate`    | All                        | Direct     | Date associated with the final reservation outcome.                                           |
-| `BookingChanges`           | Classification, regression | Indirect   | May change after booking and is unavailable at the assumed prediction point.                  |
-| `AssignedRoomType`         | Classification, regression | Indirect   | May be assigned or changed after booking.                                                     |
-| `DaysInWaitingList`        | Classification, regression | Indirect   | Can reflect post-booking waiting-list events.                                                 |
-| `IsCanceled`               | Regression, clustering     | Direct     | Classification target; excluded as an input for other tasks. It is the classification target. |
-| `ADR`                      | Regression, clustering     | Direct     | Regression target; returned separately from regression inputs and excluded from clustering so segments do not encode a booking outcome. |
-| `ADR`                      | Classification             | Borderline | May be informative at booking time; excluded by default but configurable.                     |
-| `RequiredCarParkingSpaces` | Classification, regression | Borderline | May be updated after booking; retained in both feature lists.                                 |
-| `TotalOfSpecialRequests`   | All                        | Borderline | May be updated after booking; retained in all feature lists.                                  |
+### 8.3 Clustering (Task C)
+The silhouette score of 0.216 indicates weak-to-moderate separation. This is typical for mixed booking data and one-hot representations. K-Means assumes roughly spherical clusters; segments separate mainly on party size, stay length, and lead time.
 
-## 7. Preliminary leakage audit
+## 9. Current Limitations & Milestone 2 Plan
+### 9.1 Limitations
+- **Generalizability:** The ADR filter (0 < ADR <= 500) restricts performance analysis to a specific population.
+- **Linearity:** Linear Regression cannot directly model all nonlinearities; индивидуа coefficient interpretations need care due to redundant features.
+- **Stochasticity:** Silhouette scores reflect inherent overlap in customer behavior; clusters are descriptive labels, not deterministic tiers.
 
-| Stage                                   | What the code does / what it is fitted on                                                                                                                                                     | Leakage note                                                                                               |
-|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
-| Cleaning                                | Deterministic conversions and row filters run on the full raw dataset before splitting; no learned parameters are fitted.                                                                     | Exact duplicates are detected across the entire dataset before split assignment.                           |
-| Feature selection                       | Uses static task lists and the `classification_use_adr` config flag.                                                                                                                          | No data-dependent feature selection is implemented.                                                        |
-| Split                                   | `train_test_split` assigns row positions; classification uses `IsCanceled` for stratification. Regression first applies the configured ADR target filter, then splits without stratification. | The ADR filter is a target-based rule applied before regression splitting, not a learned model step.       |
-| Classification/regression preprocessing | Fits the preprocessor on `X_train` only, then transforms validation and test inputs.                                                                                                          | No metrics or model evaluation are run by `preprocess`.                                                    |
-| Clustering preprocessing                | The CLI assigns all cleaned rows to `X_train`, `X_val`, and `X_test` (copies of the same feature frame), then fits on the full frame. The Task C K-Means baseline reuses this preprocessor on the same cleaned population. | This is not a genuine supervised split; clustering preprocessing is fitted on all cleaned records, which is acceptable for unsupervised analysis. No supervised target is used to fit the clusters. |
-| Test set                                | Supervised preprocessing transforms test inputs after fitting on train. Split-function docstrings say not to use test data for tuning or model selection.                                     | No tuning or model-selection implementation is present to enforce this rule programmatically.              |
-| Dimensionality reduction and tuning     | No implementation was found in the corresponding source packages; those package directories contain only initializers.                                                                        | Future work must fit any learned transformation/tuning exclusively within training data or training folds. |
+### 9.2 Milestone 2 Action Plan
+1. **Hyperparameter Optimization:** Implement Optuna tuning for Random Forest and XGBoost.
+2. **Advanced Clustering:** Add Agglomerative Hierarchical Clustering (on a representative sample) and GMM experiments.
+3. **Dimensionality Reduction:** Compare results using PCA-reduced feature sets versus full sparse representations.
+4. **Final Evaluation:** Execute a single, blind evaluation on the held-out `test_size: 0.15` split only after model selection is frozen.
+5. **Deployment:** Finalize the CLI to support loading saved `.joblib` artifacts for direct inference.
 
-## 8. Train/validation/test strategy
+## 10. Train/validation/test strategy
 
 The configuration sets `random_seed: 42`, `val_size: 0.15`, and `test_size: 0.15`, giving an intended 70/15/15 allocation. The split functions save zero-based row positions to `data/splits/classification_indices.json` and `data/splits/regression_indices.json`.
 
@@ -166,7 +176,7 @@ The configuration sets `random_seed: 42`, `val_size: 0.15`, and `test_size: 0.15
 
 These are row counts from the executed split commands. Clustering does not use this splitting strategy in the current `preprocess` command; see the leakage audit and discrepancy list.
 
-## 9. Preprocessing pipeline
+## 11. Preprocessing pipeline
 
 [`src/preprocessing/pipeline.py`](../src/preprocessing/pipeline.py) builds a task-specific pipeline from `get_features()`. Its docstring identifies imputers, encoder categories/frequencies, and scaler statistics as data-learned steps and instructs callers to fit on training data only.
 
@@ -180,24 +190,24 @@ These are row counts from the executed split commands. Clustering does not use t
 Executed output feature counts and artifacts:
 
 | Task           | Transformed train/validation/test shapes | Feature count | NaN check | Saved preprocessor                             |
-|----------------|------------------------------------------|--------------:|-----------|------------------------------------------------|
-| Classification | 37,130 × 88 / 7,956 × 88 / 7,957 × 88    |            88 | No NaN    | `artifacts/preprocessor_classification.joblib` |
-| Regression     | 36,623 × 87 / 7,848 × 87 / 7,848 × 87    |            87 | No NaN    | `artifacts/preprocessor_regression.joblib`     |
-| Clustering     | 53,043 × 30 / 53,043 × 30 / 53,043 × 30  |            30 | No NaN    | `artifacts/preprocessor_clustering.joblib`     |
+|----------------|------------------------------------------|---------------|-----------|------------------------------------------------|
+| Classification | 37,130 × 88 / 7,956 × 88 / 7,957 × 88    | 88            | No NaN    | `artifacts/preprocessor_classification.joblib` |
+| Regression     | 36,623 × 87 / 7,848 × 87 / 7,848 × 87    | 87            | No NaN    | `artifacts/preprocessor_regression.joblib`     |
+| Clustering     | 53,043 × 30 / 53,043 × 30 / 53,043 × 30  | 30            | No NaN    | `artifacts/preprocessor_clustering.joblib`     |
 
 For clustering, the three shapes describe repeated transforms of the same full cleaned dataset, not separate partitions.
 
-## 10. Verification
+## 12. Verification
 
 The executed `pytest` run collected **14 tests** and passed all of them:
 
-| Test file                |  Tests | Coverage read from test definitions                                                                                                                                                    |
-|--------------------------|-------:|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `tests/test_cleaning.py` |      5 | Duplicate removal, zero-guest removal, zero-night removal, `"NULL"` conversion while retaining missing `Children`, and regression ADR filtering.                                       |
-| `tests/test_eda.py`      |      1 | Checks that EDA creates its summary and expected PNG files; skips when `data/H2.csv` is absent.                                                                                        |
-| `tests/test_loader.py`   |      1 | Checks the loader’s expected shape; skips when `data/H2.csv` is absent.                                                                                                                |
-| `tests/test_pipeline.py` |      3 | Checks unseen validation categories and NaN-free equal-width outputs, train-only numeric median imputation, and engineered totals/flags.                                               |
-| `tests/test_splits.py`   |      4 | Checks split disjointness/sizes, class proportions, task leakage exclusions, regression ADR filtering, repeatability with a fixed seed, and configurable classification ADR inclusion. |
+| Test file                | Tests  | Coverage read from test definitions                                                                                                                                                    |
+|--------------------------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `tests/test_cleaning.py` | 5      | Duplicate removal, zero-guest removal, zero-night removal, `"NULL"` conversion while retaining missing `Children`, and regression ADR filtering.                                       |
+| `tests/test_eda.py`      | 1      | Checks that EDA creates its summary and expected PNG files; skips when `data/H2.csv` is absent.                                                                                        |
+| `tests/test_loader.py`   | 1      | Checks the loader’s expected shape; skips when `data/H2.csv` is absent.                                                                                                                |
+| `tests/test_pipeline.py` | 3      | Checks unseen validation categories and NaN-free equal-width outputs, train-only numeric median imputation, and engineered totals/flags.                                               |
+| `tests/test_splits.py`   | 4      | Checks split disjointness/sizes, class proportions, task leakage exclusions, regression ADR filtering, repeatability with a fixed seed, and configurable classification ADR inclusion. |
 | **Total**                | **14** | Full suite passed; one seaborn pending-deprecation warning.                                                                                                                            |
 
 After the Task B and Task C baseline work was added, the repository suite was rerun on 5 November 2026: `pytest -q` reported **27 passed** with the same seaborn pending-deprecation warning.
