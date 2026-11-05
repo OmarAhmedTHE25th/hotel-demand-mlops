@@ -6,7 +6,7 @@ from typing import Optional, Sequence
 
 import joblib
 import pandas as pd
-
+from src.regression.train import train_regression
 from src.classification.train import train_baseline_classification
 from src.clustering.train import train_baseline_clustering
 from src.tuning.classification import tune_classification
@@ -94,6 +94,13 @@ def preprocess_dataset(task: str) -> None:
     joblib.dump(preprocessor, preprocessor_path)
     print(f"Fitted preprocessor saved to: {preprocessor_path}")
 
+def train_dispatcher(task: str) -> None:
+    if task == "classification":
+        train_baseline_classification(task)
+    elif task == "regression":
+        train_regression()
+    else:
+        raise ValueError(f"Unknown task: {task}")
 
 def build_parser() -> argparse.ArgumentParser:
     """Create the CLI parser; future project commands can be added here."""
@@ -141,7 +148,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Task-specific preprocessor to fit",
     )
     preprocess_parser.set_defaults(handler=preprocess_dataset)
-    
+
     train_parser = subparsers.add_parser(
         "train", help="Train classification or regression models"
     )
@@ -151,7 +158,7 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Task to train",
     )
-    train_parser.set_defaults(handler=train_baseline_classification)
+    train_parser.set_defaults(handler=train_dispatcher)
     
     tune_parser = subparsers.add_parser(
         "tune", help="Tune classification or regression models"
@@ -193,6 +200,10 @@ def build_parser() -> argparse.ArgumentParser:
     cluster_parser.set_defaults(handler=train_baseline_clustering)
 
     return parser
+
+
+
+
 
 
 def main(argv: Optional[Sequence[str]] = None) -> None:

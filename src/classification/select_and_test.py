@@ -20,7 +20,7 @@ def evaluate_final_classification(config: Optional[Dict[str, Any]] = None) -> pd
     if config is None:
         config = load_config()
 
-    outputs_dir = Path(config.get("outputs_dir", "outputs"))
+    outputs_dir = Path(config.get("outputs_dir", "outputs")) / "classification"
     artifacts_dir = Path(config.get("artifacts_dir", "artifacts"))
 
     baseline_csv = outputs_dir / "classification_baseline_metrics.csv"

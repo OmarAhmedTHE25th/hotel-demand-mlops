@@ -41,7 +41,7 @@ def train_baseline_classification(
     results = {}
 
     artifacts_dir = Path(config.get("artifacts_dir", "artifacts"))
-    outputs_dir = Path(config.get("outputs_dir", "outputs"))
+    outputs_dir = Path(config.get("outputs_dir", "outputs")) / "classification"
     artifacts_dir.mkdir(parents=True, exist_ok=True)
     outputs_dir.mkdir(parents=True, exist_ok=True)
 

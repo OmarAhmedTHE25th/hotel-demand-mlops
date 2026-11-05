@@ -69,7 +69,7 @@ python main.py split --task classification
 python main.py preprocess --task classification
 python main.py train --task classification
 ```
-*Outputs to `outputs/`*
+*Outputs to `outputs/classification/`*
 
 ### Task C (Clustering)
 ```powershell
