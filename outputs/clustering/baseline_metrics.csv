@@ -1,0 +1,2 @@
+algorithm,configuration,n_samples,n_clusters,inertia,silhouette,davies_bouldin,calinski_harabasz,fit_seconds
+kmeans,untuned_baseline,53043,5,355680.09750502976,0.21570312475663886,1.3600393487725175,8765.787139429804,0.5881989999907091

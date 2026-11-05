@@ -1,0 +1,64 @@
+{
+  "task": "clustering",
+  "algorithm": "kmeans",
+  "configuration": "untuned_baseline",
+  "evaluation_population": "all cleaned rows (unsupervised)",
+  "supervised_targets_used": false,
+  "final_test_set_scored": false,
+  "n_clusters": 5,
+  "n_samples": 53043,
+  "n_transformed_features": 30,
+  "features": [
+    "LeadTime",
+    "StaysInWeekendNights",
+    "StaysInWeekNights",
+    "Adults",
+    "Children",
+    "Babies",
+    "MarketSegment",
+    "DistributionChannel",
+    "DepositType",
+    "CustomerType",
+    "IsRepeatedGuest",
+    "TotalOfSpecialRequests"
+  ],
+  "excluded_from_clustering": [
+    "ADR",
+    "IsCanceled"
+  ],
+  "silhouette_sample_size": 10000,
+  "k_diagnostic_range": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "fit_seconds": 0.5881989999907091,
+  "config": {
+    "data_path": "data/H2.csv",
+    "cleaned_data_path": "data/H2_clean.csv",
+    "adr_max": 500,
+    "classification_use_adr": false,
+    "log_transform_leadtime": true,
+    "random_seed": 42,
+    "test_size": 0.15,
+    "val_size": 0.15,
+    "outputs_dir": "outputs",
+    "artifacts_dir": "artifacts",
+    "splits_dir": "data/splits",
+    "regression_exclude_features": [
+      "RequiredCarParkingSpaces",
+      "TotalOfSpecialRequests"
+    ]
+  },
+  "cleaned_data_sha256": "8c509dd1ea63fc0c71d0de0405fcfa74dde50f9e58a4c02eaa36f6db5de3c736",
+  "python": "3.12.13",
+  "sklearn": "1.9.1",
+  "pandas": "3.1.1",
+  "numpy": "2.5.4"
+}

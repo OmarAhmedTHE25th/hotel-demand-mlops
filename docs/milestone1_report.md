@@ -122,9 +122,11 @@ The feature definitions assume classification and regression predictions are mad
 
 `ADR` is the regression target.
 
-**Clustering kept features** (13):
+**Clustering kept features** (12):
 
-`LeadTime`, `StaysInWeekendNights`, `StaysInWeekNights`, `Adults`, `Children`, `Babies`, `MarketSegment`, `DistributionChannel`, `DepositType`, `CustomerType`, `ADR`, `IsRepeatedGuest`, `TotalOfSpecialRequests`.
+`LeadTime`, `StaysInWeekendNights`, `StaysInWeekNights`, `Adults`, `Children`, `Babies`, `MarketSegment`, `DistributionChannel`, `DepositType`, `CustomerType`, `IsRepeatedGuest`, `TotalOfSpecialRequests`.
+
+`ADR` is excluded from clustering inputs so the discovered segments do not encode a realized booking outcome; `IsCanceled` remains excluded as the classification target. Both are removed in [`src/features/feature_sets.py`](../src/features/feature_sets.py).
 
 The `EXCLUDED` and `BORDERLINE` documentation in [`src/features/feature_sets.py`](../src/features/feature_sets.py) specifies:
 
@@ -136,7 +138,7 @@ The `EXCLUDED` and `BORDERLINE` documentation in [`src/features/feature_sets.py`
 | `AssignedRoomType`         | Classification, regression | Indirect   | May be assigned or changed after booking.                                                     |
 | `DaysInWaitingList`        | Classification, regression | Indirect   | Can reflect post-booking waiting-list events.                                                 |
 | `IsCanceled`               | Regression, clustering     | Direct     | Classification target; excluded as an input for other tasks. It is the classification target. |
-| `ADR`                      | Regression                 | Direct     | Regression target, returned separately from regression inputs.                                |
+| `ADR`                      | Regression, clustering     | Direct     | Regression target; returned separately from regression inputs and excluded from clustering so segments do not encode a booking outcome. |
 | `ADR`                      | Classification             | Borderline | May be informative at booking time; excluded by default but configurable.                     |
 | `RequiredCarParkingSpaces` | Classification, regression | Borderline | May be updated after booking; retained in both feature lists.                                 |
 | `TotalOfSpecialRequests`   | All                        | Borderline | May be updated after booking; retained in all feature lists.                                  |
@@ -149,7 +151,7 @@ The `EXCLUDED` and `BORDERLINE` documentation in [`src/features/feature_sets.py`
 | Feature selection                       | Uses static task lists and the `classification_use_adr` config flag.                                                                                                                          | No data-dependent feature selection is implemented.                                                        |
 | Split                                   | `train_test_split` assigns row positions; classification uses `IsCanceled` for stratification. Regression first applies the configured ADR target filter, then splits without stratification. | The ADR filter is a target-based rule applied before regression splitting, not a learned model step.       |
 | Classification/regression preprocessing | Fits the preprocessor on `X_train` only, then transforms validation and test inputs.                                                                                                          | No metrics or model evaluation are run by `preprocess`.                                                    |
-| Clustering preprocessing                | The CLI assigns all cleaned rows to `X_train`, `X_val`, and `X_test` (copies of the same feature frame), then fits on the full frame.                                                         | This is not a genuine split; clustering preprocessing is fitted on all cleaned records.                    |
+| Clustering preprocessing                | The CLI assigns all cleaned rows to `X_train`, `X_val`, and `X_test` (copies of the same feature frame), then fits on the full frame. The Task C K-Means baseline reuses this preprocessor on the same cleaned population. | This is not a genuine supervised split; clustering preprocessing is fitted on all cleaned records, which is acceptable for unsupervised analysis. No supervised target is used to fit the clusters. |
 | Test set                                | Supervised preprocessing transforms test inputs after fitting on train. Split-function docstrings say not to use test data for tuning or model selection.                                     | No tuning or model-selection implementation is present to enforce this rule programmatically.              |
 | Dimensionality reduction and tuning     | No implementation was found in the corresponding source packages; those package directories contain only initializers.                                                                        | Future work must fit any learned transformation/tuning exclusively within training data or training folds. |
 
@@ -181,7 +183,7 @@ Executed output feature counts and artifacts:
 |----------------|------------------------------------------|--------------:|-----------|------------------------------------------------|
 | Classification | 37,130 × 88 / 7,956 × 88 / 7,957 × 88    |            88 | No NaN    | `artifacts/preprocessor_classification.joblib` |
 | Regression     | 36,623 × 87 / 7,848 × 87 / 7,848 × 87    |            87 | No NaN    | `artifacts/preprocessor_regression.joblib`     |
-| Clustering     | 53,043 × 31 / 53,043 × 31 / 53,043 × 31  |            31 | No NaN    | `artifacts/preprocessor_clustering.joblib`     |
+| Clustering     | 53,043 × 30 / 53,043 × 30 / 53,043 × 30  |            30 | No NaN    | `artifacts/preprocessor_clustering.joblib`     |
 
 For clustering, the three shapes describe repeated transforms of the same full cleaned dataset, not separate partitions.
 
@@ -198,17 +200,19 @@ The executed `pytest` run collected **14 tests** and passed all of them:
 | `tests/test_splits.py`   |      4 | Checks split disjointness/sizes, class proportions, task leakage exclusions, regression ADR filtering, repeatability with a fixed seed, and configurable classification ADR inclusion. |
 | **Total**                | **14** | Full suite passed; one seaborn pending-deprecation warning.                                                                                                                            |
 
+After the Task B and Task C baseline work was added, the repository suite was rerun on 5 November 2026: `pytest -q` reported **27 passed** with the same seaborn pending-deprecation warning.
+
 ## 11. Known limitations and plan for Milestone 2
 
-No model training, baseline evaluation, clustering algorithm, inference implementation, dimensionality reduction, or hyperparameter tuning is present in the inspected project source. The cleaning rules are deterministic but rely on exact-row equality and the selected zero-guest/zero-night rules. The regression-only ADR filter changes the population used for regression and must be stated when comparing tasks. `RequiredCarParkingSpaces`, `TotalOfSpecialRequests`, and optionally `ADR` for classification are retained despite being documented as borderline. Clustering currently includes `ADR`, does not apply the regression ADR filter, and fits its preprocessing on all cleaned rows. The next milestone should define and implement task models and evaluation while preserving the booking-time feature boundary, using train-only fitting, and reserving the test set for final evaluation.
+No model training, baseline evaluation, inference implementation, dimensionality reduction, or hyperparameter tuning was present when this data-side section was written; the regression, classification, and Task C K-Means baselines are documented in the README. The cleaning rules are deterministic but rely on exact-row equality and the selected zero-guest/zero-night rules. The regression-only ADR filter changes the population used for regression and must be stated when comparing tasks. `RequiredCarParkingSpaces`, `TotalOfSpecialRequests`, and optionally `ADR` for classification are retained despite being documented as borderline. Clustering now excludes `ADR` and does not apply the regression ADR filter; it fits its preprocessing on all cleaned rows because the analysis is unsupervised. The next milestone should complete task tuning and evaluation while preserving the booking-time feature boundary, using train-only fitting for supervised preprocessing, and reserving the test set for final evaluation.
 
 ### Discrepancy list
 
 - **`LeadTime` log transform:** implemented as `np.log1p`, enabled by default in config. The test suite does not assert the transformed `LeadTime` values or the disabled-config behavior.
 - **`HasCompany` / `HasAgent`:** both are implemented when their source columns are in the task features; raw `Company` is dropped and raw `Agent` is retained. The pipeline test checks both flags.
 - **Rare-category grouping at 1%:** implemented for high-cardinality `Country` and `Agent` only. Low-cardinality categoricals do not use `min_frequency`; tests exercise an unseen category but do not verify the 1% grouping threshold.
-- **Seed 42:** present in config and used by the supervised split functions. Tests use seed 42 and check repeatability, but do not verify alternate configured seeds. Clustering does not perform a split or use the seed.
-- **70/15/15 split:** implemented for classification and regression using configured validation/test sizes. Regression first filters by target `ADR`. Clustering preprocessing instead copies the full cleaned data into train, validation, and test roles and fits on the full data.
+- **Seed 42:** present in config and used by the supervised split functions and the Task C K-Means baseline. Tests use seed 42 and check repeatability, but do not verify alternate configured seeds. Clustering does not perform a supervised split.
+- **70/15/15 split:** implemented for classification and regression using configured validation/test sizes. Regression first filters by target `ADR`. Clustering preprocessing instead copies the full cleaned data into train, validation, and test roles and fits on the full data; the K-Means baseline uses that same full cleaned population.
 - **Regression ADR threshold:** the configured value is 500 and regression filtering removed 724 cleaned rows. The general cleaning command does not apply the ADR filter.
 - **Test-set isolation:** supervised preprocessing fits on train and transforms validation/test, and split docstrings prohibit test-set tuning. No model selection/tuning code currently enforces that policy; clustering preprocessing fits on all cleaned rows.
 - **Duplicate handling:** exact duplicates are removed before splitting. The code and tests do not establish that every exact duplicate is an accidental duplicate booking rather than a distinct booking with identical recorded values.

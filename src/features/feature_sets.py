@@ -41,9 +41,12 @@ EXCLUDED = {
         "reason": "Classification target; excluded as an input for other tasks.",
     },
     "ADR": {
-        "tasks": ["regression"],
+        "tasks": ["regression", "clustering"],
         "type": "direct",
-        "reason": "Regression target; returned separately from its input features.",
+        "reason": (
+            "Regression target; returned separately from its input features and "
+            "excluded from clustering so segments do not encode a booking outcome."
+        ),
     },
 }
 
@@ -133,7 +136,6 @@ CLUSTERING_FEATURES = [
     "DistributionChannel",
     "DepositType",
     "CustomerType",
-    "ADR",
     "IsRepeatedGuest",
     "TotalOfSpecialRequests",
 ]
