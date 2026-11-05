@@ -202,18 +202,4 @@ The executed `pytest` run collected **14 tests** and passed all of them:
 
 After the Task B and Task C baseline work was added, the repository suite was rerun on 5 November 2026: `pytest -q` reported **27 passed** with the same seaborn pending-deprecation warning.
 
-## 11. Known limitations and plan for Milestone 2
 
-No model training, baseline evaluation, inference implementation, dimensionality reduction, or hyperparameter tuning was present when this data-side section was written; the regression, classification, and Task C K-Means baselines are documented in the README. The cleaning rules are deterministic but rely on exact-row equality and the selected zero-guest/zero-night rules. The regression-only ADR filter changes the population used for regression and must be stated when comparing tasks. `RequiredCarParkingSpaces`, `TotalOfSpecialRequests`, and optionally `ADR` for classification are retained despite being documented as borderline. Clustering now excludes `ADR` and does not apply the regression ADR filter; it fits its preprocessing on all cleaned rows because the analysis is unsupervised. The next milestone should complete task tuning and evaluation while preserving the booking-time feature boundary, using train-only fitting for supervised preprocessing, and reserving the test set for final evaluation.
-
-### Discrepancy list
-
-- **`LeadTime` log transform:** implemented as `np.log1p`, enabled by default in config. The test suite does not assert the transformed `LeadTime` values or the disabled-config behavior.
-- **`HasCompany` / `HasAgent`:** both are implemented when their source columns are in the task features; raw `Company` is dropped and raw `Agent` is retained. The pipeline test checks both flags.
-- **Rare-category grouping at 1%:** implemented for high-cardinality `Country` and `Agent` only. Low-cardinality categoricals do not use `min_frequency`; tests exercise an unseen category but do not verify the 1% grouping threshold.
-- **Seed 42:** present in config and used by the supervised split functions and the Task C K-Means baseline. Tests use seed 42 and check repeatability, but do not verify alternate configured seeds. Clustering does not perform a supervised split.
-- **70/15/15 split:** implemented for classification and regression using configured validation/test sizes. Regression first filters by target `ADR`. Clustering preprocessing instead copies the full cleaned data into train, validation, and test roles and fits on the full data; the K-Means baseline uses that same full cleaned population.
-- **Regression ADR threshold:** the configured value is 500 and regression filtering removed 724 cleaned rows. The general cleaning command does not apply the ADR filter.
-- **Test-set isolation:** supervised preprocessing fits on train and transforms validation/test, and split docstrings prohibit test-set tuning. No model selection/tuning code currently enforces that policy; clustering preprocessing fits on all cleaned rows.
-- **Duplicate handling:** exact duplicates are removed before splitting. The code and tests do not establish that every exact duplicate is an accidental duplicate booking rather than a distinct booking with identical recorded values.
-- **Future procedures:** dimensionality reduction and tuning are not implemented or tested in this milestone.
