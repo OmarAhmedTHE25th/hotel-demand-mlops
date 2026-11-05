@@ -5,7 +5,7 @@
 - Omar Ahmed Abdel Hameed — GitHub: `OmarAhmedTHE25th` — Task B (Classification)
 - Omar Mohamed Salaheldin — GitHub: `subzeroomar` — Task A (Regression)
 - Mohamed Amr Nady — GitHub: `mohamedamrnady` — Task C (Clustering)
-- Team member: `<Name>` — GitHub: `<username>`
+- Ahmed Mohamed Abd-Elmageed — GitHub: `ahmedmohamedioskareem-cloud`
 
 ## Repository
 
